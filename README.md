@@ -2,6 +2,8 @@
 
 Easy-to-use image converter for modern formats, built with Electron and TypeScript.
 
+> **Note:** This is a complete rewrite from Python/PySide6 to TypeScript/Electron. The original code is available in the `old/` directory. See [MIGRATION.md](MIGRATION.md) for details.
+
 ## Features
 
 #### Modern Image Formats
