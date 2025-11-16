@@ -34,6 +34,19 @@ export interface OutputSettings {
   suffix: string;
 }
 
+export interface WindowSettings {
+  width: number;
+  height: number;
+  x?: number;
+  y?: number;
+  maximized: boolean;
+}
+
+export interface AppState {
+  settings: ProcessingSettings;
+  window: WindowSettings;
+}
+
 export interface ProcessingSettings {
   output: OutputSettings;
   downscale: DownscaleSettings;

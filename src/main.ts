@@ -2,25 +2,53 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import * as path from 'path';
 import { Controller } from './main/controller';
 import { ProcessManager } from './main/process-manager';
+import { SettingsManager, AppSettings } from './main/settings-manager';
+import { UpdateManager } from './main/updater';
 
 let mainWindow: BrowserWindow | null = null;
 let controller: Controller | null = null;
+let updateManager: UpdateManager | null = null;
 
 function createWindow(): void {
+  const settingsManager = SettingsManager.getInstance();
+  const windowState = settingsManager.get('window');
+
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 600,
+    width: windowState?.width ?? 900,
+    height: windowState?.height ?? 600,
+    x: windowState?.x,
+    y: windowState?.y,
     title: 'XL Converter',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
-    }
+    },
+    frame: false,
+    titleBarStyle: 'hidden',
   });
+
+  if (windowState?.maximized) {
+    mainWindow.maximize();
+  }
 
   mainWindow.loadFile(path.join(__dirname, 'renderer/index.html'));
 
   controller = new Controller(mainWindow);
+  updateManager = new UpdateManager(mainWindow);
+
+  mainWindow.on('close', () => {
+    if (mainWindow) {
+      const bounds = mainWindow.getBounds();
+      SettingsManager.getInstance().set('window', {
+        width: bounds.width,
+        height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
+        maximized: mainWindow.isMaximized(),
+      });
+    }
+  });
 
   mainWindow.on('closed', () => {
     if (controller) {
@@ -33,6 +61,7 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   createWindow();
+  updateManager?.checkForUpdates();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -92,4 +121,52 @@ ipcMain.handle('dialog:openDirectory', async () => {
   });
 
   return result.filePaths[0] || null;
+});
+
+ipcMain.handle('settings:get', async () => {
+  return SettingsManager.getInstance().getAll();
+});
+
+ipcMain.handle('settings:save', async (_event, settings: Partial<AppSettings>) => {
+  SettingsManager.getInstance().setAll(settings);
+});
+
+ipcMain.handle('settings:reset', async () => {
+  SettingsManager.getInstance().reset();
+});
+
+ipcMain.handle('window:minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.handle('window:maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+});
+
+ipcMain.handle('window:close', () => {
+  if (mainWindow) mainWindow.close();
+});
+
+ipcMain.handle('update:check', async () => {
+  if (updateManager) {
+    await updateManager.checkForUpdates();
+  }
+});
+
+ipcMain.handle('update:download', async () => {
+  if (updateManager) {
+    await updateManager.downloadUpdate();
+  }
+});
+
+ipcMain.handle('update:install', () => {
+  if (updateManager) {
+    updateManager.quitAndInstall();
+  }
 });

@@ -16,6 +16,22 @@ declare global {
         openFiles: () => Promise<string[]>;
         openDirectory: () => Promise<string | null>;
       };
+      settings: {
+        get: () => Promise<any>;
+        save: (settings: any) => Promise<void>;
+        reset: () => Promise<void>;
+      };
+      window: {
+        minimize: () => Promise<void>;
+        maximize: () => Promise<void>;
+        close: () => Promise<void>;
+      };
+      update: {
+        check: () => Promise<void>;
+        download: () => Promise<void>;
+        install: () => Promise<void>;
+        onStatus: (callback: (status: { event: string; data?: any }) => void) => () => void;
+      };
     };
   }
 }
@@ -26,14 +42,19 @@ class App {
   private unsubscribeProgress: (() => void) | null = null;
   private unsubscribeComplete: (() => void) | null = null;
   private unsubscribeError: (() => void) | null = null;
+  private cachedSettings: ProcessingSettings | null = null;
 
   constructor() {
+    this.initTitlebar();
     this.initTabs();
     this.initInputTab();
     this.initOutputTab();
     this.initModifyTab();
     this.initSettingsTab();
     this.initProgressModal();
+    this.loadSettings();
+    this.setupAutoSave();
+    this.setupUpdateHandlers();
   }
 
   private initTabs(): void {
@@ -531,6 +552,122 @@ class App {
 
   private generateId(): string {
     return Math.random().toString(36).substring(2, 10);
+  }
+
+  private initTitlebar(): void {
+    const minimizeBtn = document.getElementById('window-minimize');
+    const maximizeBtn = document.getElementById('window-maximize');
+    const closeBtn = document.getElementById('window-close');
+
+    minimizeBtn?.addEventListener('click', () => {
+      window.electron.window.minimize();
+    });
+
+    maximizeBtn?.addEventListener('click', () => {
+      window.electron.window.maximize();
+    });
+
+    closeBtn?.addEventListener('click', () => {
+      window.electron.window.close();
+    });
+  }
+
+  private async loadSettings(): Promise<void> {
+    try {
+      const settings = await window.electron.settings.get();
+      
+      if (settings?.output) {
+        this.applySettings(settings);
+      }
+    } catch (error) {
+      console.error('Failed to load settings', error);
+    }
+  }
+
+  private applySettings(settings: any): void {
+    if (!settings) return;
+
+    const { output, downscale, advanced } = settings;
+
+    if (output) {
+      const formatRadio = document.querySelector(`input[name="format"][value="${output.format}"]`) as HTMLInputElement;
+      if (formatRadio) formatRadio.checked = true;
+
+      const qualitySlider = document.getElementById('quality-slider') as HTMLInputElement;
+      if (qualitySlider) qualitySlider.value = String(output.quality);
+      
+      const qualityValue = document.getElementById('quality-value');
+      if (qualityValue) qualityValue.textContent = String(output.quality);
+
+      const effortSlider = document.getElementById('effort-slider') as HTMLInputElement;
+      if (effortSlider) effortSlider.value = String(output.effort);
+      
+      const effortValue = document.getElementById('effort-value');
+      if (effortValue) effortValue.textContent = String(output.effort);
+    }
+
+    if (downscale) {
+      const modeSelect = document.getElementById('downscale-mode') as HTMLSelectElement;
+      if (modeSelect) modeSelect.value = downscale.mode;
+    }
+
+    if (advanced) {
+      const concurrencyInput = document.getElementById('concurrency-input') as HTMLInputElement;
+      if (concurrencyInput) concurrencyInput.value = String(advanced.concurrency);
+
+      const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
+      if (volumeSlider) volumeSlider.value = String(advanced.soundVolume);
+      
+      const volumeValue = document.getElementById('volume-value');
+      if (volumeValue) volumeValue.textContent = String(advanced.soundVolume);
+    }
+  }
+
+  private setupAutoSave(): void {
+    let saveTimeout: NodeJS.Timeout;
+
+    const debouncedSave = () => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(async () => {
+        const settings = this.getSettings();
+        try {
+          await window.electron.settings.save(settings);
+        } catch (error) {
+          console.error('Failed to save settings', error);
+        }
+      }, 500);
+    };
+
+    document.querySelectorAll('input, select').forEach((element) => {
+      element.addEventListener('change', debouncedSave);
+    });
+  }
+
+  private setupUpdateHandlers(): void {
+    window.electron.update.onStatus((status) => {
+      this.handleUpdateStatus(status);
+    });
+  }
+
+  private handleUpdateStatus(status: { event: string; data?: any }): void {
+    switch (status.event) {
+      case 'update-available':
+        if (window.confirm(`New version ${status.data.version} is available. Download now?`)) {
+          window.electron.update.download();
+        }
+        break;
+      case 'update-downloaded':
+        if (window.confirm('Update downloaded. Restart to install?')) {
+          window.electron.update.install();
+        }
+        break;
+      case 'download-progress':
+        console.log(`Download progress: ${Math.round(status.data.percent)}%`);
+        break;
+      case 'update-error':
+        console.error('Update error:', status.data.message);
+        break;
+    }
   }
 }
 

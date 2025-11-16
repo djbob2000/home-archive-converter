@@ -154,13 +154,16 @@ npm run package  # Create distributable
 8. ✅ Implemented renderer process logic
 9. ✅ Added build and packaging scripts
 10. ✅ Updated documentation
+11. ✅ Integrated Jest for unit testing
+12. ✅ Added settings persistence with electron-store
+13. ✅ Implemented auto-updates with electron-updater
+14. ✅ Created custom titlebar for better UX
+15. ✅ Added live preview pane powered by React
 
 ## Future Improvements
 
-- Consider React or Vue for more complex UI
-- Add unit tests with Jest
-- Implement automatic updates (electron-updater)
-- Add more image format support when Sharp adds them
-- Create custom titlebar for better UX
-- Add settings persistence (electron-store)
-- Implement preview functionality
+- Expand React-based components across more of the UI for richer interactions
+- Add end-to-end tests (e.g., Playwright) to complement unit tests
+- Integrate additional modern formats as Sharp releases support (e.g., HEIF, JPEG XL decoding)
+- Provide theme customization and accessibility enhancements
+- Extend preview pane with side-by-side before/after comparison and zoom tools

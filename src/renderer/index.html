@@ -4,10 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>XL Converter</title>
+  <link rel="stylesheet" href="titlebar.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div id="app">
+    <header class="titlebar" id="titlebar">
+      <div class="titlebar-title">
+        <img src="../assets/icons/logo.svg" alt="XL Converter" class="titlebar-icon" />
+        <span>XL Converter</span>
+      </div>
+      <div class="titlebar-controls">
+        <button class="titlebar-button minimize" id="window-minimize" aria-label="Minimize">
+          <svg viewBox="0 0 10 10"><path d="M1 5h8" stroke="currentColor" fill="none" /></svg>
+        </button>
+        <button class="titlebar-button maximize" id="window-maximize" aria-label="Maximize">
+          <svg viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="7" height="7" stroke="currentColor" fill="none" /></svg>
+        </button>
+        <button class="titlebar-button close" id="window-close" aria-label="Close">
+          <svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" fill="none" /></svg>
+        </button>
+      </div>
+    </header>
+
     <div class="tabs">
       <button class="tab-button active" data-tab="input">Input</button>
       <button class="tab-button" data-tab="output">Output</button>
@@ -29,7 +48,10 @@
           </div>
         </div>
 
-        <div class="file-list" id="file-list"></div>
+        <div class="file-preview-container">
+          <div class="file-list" id="file-list"></div>
+          <div id="preview-root" class="preview-root"></div>
+        </div>
 
         <div class="actions">
           <button class="btn btn-secondary" id="clear-btn">Clear</button>

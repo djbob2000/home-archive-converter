@@ -26,6 +26,22 @@ Keep EXIF metadata and file timestamps intact during conversion.
 
 Choose to overwrite, skip, or automatically rename duplicate files.
 
+#### Settings Persistence
+
+Automatically saves your preferences using `electron-store`, so your workflow continues where you left off.
+
+#### Auto-Updates
+
+Integrated with `electron-updater` to check for new releases, download them, and install on restart.
+
+#### Custom Titlebar
+
+A native-inspired titlebar with window controls that keeps the content area consistent across platforms.
+
+#### Live Preview
+
+Preview input images directly inside the app, with React-powered components for richer interactivity.
+
 ## Technology Stack
 
 - **Electron** - Cross-platform desktop framework

@@ -23,5 +23,25 @@ contextBridge.exposeInMainWorld('electron', {
   dialog: {
     openFiles: () => ipcRenderer.invoke('dialog:openFiles'),
     openDirectory: () => ipcRenderer.invoke('dialog:openDirectory')
+  },
+  settings: {
+    get: () => ipcRenderer.invoke('settings:get'),
+    save: (settings: any) => ipcRenderer.invoke('settings:save', settings),
+    reset: () => ipcRenderer.invoke('settings:reset'),
+  },
+  window: {
+    minimize: () => ipcRenderer.invoke('window:minimize'),
+    maximize: () => ipcRenderer.invoke('window:maximize'),
+    close: () => ipcRenderer.invoke('window:close'),
+  },
+  update: {
+    check: () => ipcRenderer.invoke('update:check'),
+    download: () => ipcRenderer.invoke('update:download'),
+    install: () => ipcRenderer.invoke('update:install'),
+    onStatus: (callback: (status: any) => void) => {
+      const listener = (_event: any, status: any) => callback(status);
+      ipcRenderer.on('update-status', listener);
+      return () => ipcRenderer.removeListener('update-status', listener);
+    },
   }
 });

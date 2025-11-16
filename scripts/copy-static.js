@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const files = ['index.html', 'styles.css'];
+const files = ['index.html', 'styles.css', 'titlebar.css'];
 const sourceDir = path.resolve(__dirname, '../src/renderer');
 const targetDir = path.resolve(__dirname, '../dist/renderer');
 
