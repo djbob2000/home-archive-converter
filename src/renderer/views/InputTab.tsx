@@ -1,4 +1,4 @@
-import { type DragEvent, useCallback, useState } from "react";
+import { type DragEvent, type KeyboardEvent, useCallback, useState } from "react";
 import type { InputItem } from "../../common/types";
 import { formatSize } from "../utils/format";
 
@@ -43,13 +43,26 @@ export const InputTab = ({
 		await onAddFiles(paths);
 	}, [onAddFiles]);
 
+	const handleKeyDown = useCallback(
+		(event: KeyboardEvent<HTMLDivElement>) => {
+			if (event.key === "Enter" || event.key === " ") {
+				event.preventDefault();
+				void handleBrowse();
+			}
+		},
+		[handleBrowse],
+	);
+
 	return (
 		<div className="mx-auto flex h-full w-full max-w-5xl flex-col gap-6 px-4 py-6">
-			<button
-				type="button"
+			{/* biome-ignore lint/a11y/useSemanticElements -- div provides flexible drag-and-drop surface while retaining keyboard support */}
+			<div
+				role="button"
+				tabIndex={0}
 				onClick={() => {
 					void handleBrowse();
 				}}
+				onKeyDown={handleKeyDown}
 				onDragOver={(event) => {
 					event.preventDefault();
 					setDragOver(true);
@@ -63,13 +76,17 @@ export const InputTab = ({
 				<svg aria-hidden="true" className="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
 					<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z" />
 				</svg>
-				<span className="text-lg font-medium text-slate-700">
-					Drop files here or click to browse
-				</span>
-				<span className="button-primary rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white">
+				<div className="text-lg font-medium text-slate-700">
+					Drop files here or press Enter to browse
+				</div>
+				<button
+					type="button"
+					onClick={handleBrowse}
+					className="button-primary rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+				>
 					Add Files
-				</span>
-			</button>
+				</button>
+			</div>
 
 			<div className="grid flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
 				<div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-sm">

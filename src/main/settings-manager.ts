@@ -158,9 +158,11 @@ export class SettingsManager {
 	}
 
 	setAll(settings: Partial<AppSettings>): void {
-		Object.entries(settings).forEach(([key, value]) => {
+		const keys = Object.keys(settings) as Array<keyof AppSettings>;
+		keys.forEach((key) => {
+			const value = settings[key];
 			if (value !== undefined) {
-				this.store.set(key as keyof AppSettings, value as any);
+				this.store.set(key, value);
 			}
 		});
 	}
