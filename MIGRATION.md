@@ -2,7 +2,7 @@
 
 This document describes the migration of XL Converter from Python/PySide6 to TypeScript/Electron.
 
-> **Note:** The original Python/PySide6 code is preserved in the `old/` directory for reference.
+> **Note:** The original Python/PySide6 code has been archived and is available in the git history (commit `6fcad3a`) if needed for reference.
 
 ## Major Changes
 
