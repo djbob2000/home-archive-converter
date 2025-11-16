@@ -1,4 +1,4 @@
-import Store from 'electron-store';
+import Store, { type Schema } from 'electron-store';
 
 export interface AppSettings {
   output: {
@@ -39,7 +39,7 @@ export interface AppSettings {
   };
 }
 
-const schema: Store.Schema<AppSettings> = {
+const schema: Schema<AppSettings> = {
   output: {
     type: 'object',
     properties: {
